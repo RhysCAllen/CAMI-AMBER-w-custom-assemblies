@@ -1,12 +1,19 @@
 September 2nd, 2026
 
-Rough draft of guide to analyze taxon bins from CAMI II plant rhizosphere challenge. 
-It seems like the official tutorial is a work in progress:
+I'm a new user of CAMI, using the Plant Rhizosphere dataset from the CAMI II challenges.
+The taxon binning challenge of CAMI II, evaluated with AMBER, supports evaluating binning/classification of assemblies. 
 
-https://github.com/CAMI-challenge/AMBER/blob/master/tutorial.txt
+Purpose of this repo:
+1) Document for myself this procedure of evaluating my own custom assemblies with AMBER, if possible.
+2) Possibly CAMI team will reply indicating whether this procedure is on the right track, or suggest corrections. 
 
-The motivations for this repo are:  
-a) Try to document for myself these steps, hopefully figuring out as I go. I am attempting to fill in my gaps in understanding that remain after reviewing the official documentation for submitting taxon bins to the CAMI web portal.  
-b) Share this document with CAMI team, hopefully receiving any corrections needed.  
-c) Share publicly as a CAMI II challenge repo issue, to hopefully be useful supplement to official AMBER documentation for the CAMI challenges.   
+My current understanding:
+The input file of AMBER has a required SEQUENCEID column, which is the basis of the AMBER evaluations. This column must include sequence from CAMI reference data.
+There are two options for the SEQUENCEID column:
+A) Gold-standard contig IDs
+Users can bin the provided gold-standard assemblies (contigs), listed in the SEQUENCEID column, such as cvcvcv.
+B) Individual CAMI read IDs
+I believe AMBER can also evaluate bins of user-created assemblies, CAMI read IDs are mapped to user-created contigs/bins.
+For this option, the SEQUENCEID column contains individual CAMI read IDs, such as ghghgh. 
 
+The AMBER repo gives support for option A. This repo is attempting to provide an example of option B. 
