@@ -32,6 +32,7 @@ def main():
     winners = [];
 
    
+    #make a list of dicts containing all the winning classifications from each kreport
     #pseudocode for this bit:
     # path= location of kreport files
     # for each file:
@@ -63,42 +64,71 @@ def main():
                             if row["percent"] >= PERCENT:  #comment out this row when using singleton bins
                                 winners.append(row);      #comment out this row when using singleton bins
 
-# head reads-to-contigs-mapping.tsv 
-# QNAME	RNAME
-# S0R16554400/1 BH:failed	c_000000131573
-# S0R16554448/2 BH:changed:10	c_000000004317
-# S0R16554483/2 BH:changed:5	c_000000057414
+    # head reads-to-contigs-mapping.tsv 
+    # QNAME	RNAME
+    # S0R16554400/1 BH:failed	c_000000131573
+    # S0R16554448/2 BH:changed:10	c_000000004317
+    # S0R16554483/2 BH:changed:5	c_000000057414
 
     
+    #take all the winning kreport results from above, and map them to their CAMI seq IDs:
     bioboxOut = [];
-    bioboxKeys = ["seqID", "binID", "taxID", "contig", "length", "percent"];
+    bioboxKeys = ["@@SEQUENCEID", "BINID", "TAXID", "_CONTIG_", "_LENGTH_", "_PERCENT_", "_RANK_", "_TAXON_"]; #only the first three are used by AMBER for read seqIDs. "length" is used by AMBER for contig seqIDs. 
 
     for winner in winners: #winner is a dict with these keys: ["percent", "contain", "assign", "rank", "taxid", "taxon", "contig", "binid"]
-        #get the contig of the winner
-        #look up that contig in readsMapping
+        #get the contig of a winner
+        contig = winner["contig"];
+        #look up that contig in readsMapping list of dicts
         #write all of the reads for that contig, one read per row, to bioboxOut;
         # strip the BH from the read name before writing each row
         for read in readsMapping: #read is a dict with these keys: QNAME	RNAME
-            
+            if read["RNAME"] == contig:
+                #strip the BH chars offa RNAME
+                seq = read["QNAME"].split(None, 1)[0] #get first field after splitting QNAME value by whitespace
+                #make a new dict to add to bioboxOut:
+                result = {"@@SEQUENCEID": seq, "BINID": winner["binid"], "taxID": winner["taxid"], "length": winner["assign"], "contig": read[RNAME], "percent": winner["percent"], "rank": winner["rank"], "taxon": winner["taxon"]};
+                bioboxOut.append(result);
+
+    #write mapped kreport + seqID to biobox format, to use as AMBER input.
+
+    # with open("output.csv", mode="a", newline="", encoding="utf-8") as f:
+    # # 1. Write the unique string rows first using standard csv.writer
+    # std_writer = csv.writer(f)
+    # std_writer.writerows(unique_strings)
+    
+    # # 2. Switch to csv.DictWriter to append dictionary rows
+    # dict_writer = csv.DictWriter(f, fieldnames=fieldnames)
+    
+    # # Optional: write header if starting a new file or if required
+    # # dict_writer.writeheader()
+    
+    # # Write the dictionary rows
+    # dict_writer.writerows(dict_data)
 
 
-
-
-
-    #write file in AMBER format of all of your bin/contig classifications, with one CAMI read per line. Good grief
     # #CAMI Format for Binning
     # @Version:0.9.0
-    # @SampleID:rhimgCAMI2_short_read_sample_0 or SAMPLENAME
-    # @@SEQUENCEID	BINID	TAXID	_CONTIG_	_LENGTH_	_PERCENT_
-    
-    
-    
-    
-    #Ok so then once we are done with the kreports and made the summary dict,
-    #we append sequences from the reads-to-contigs mapping file. 
+    # @SampleID:rhimgCAMI2_short_read_sample_0
+    # @@SEQUENCEID	BINID	TAXID	_CONTIG_	_LENGTH_	_PERCENT_   _RANK_  _TAXON_
 
-    #readsMapping = [];  # a very large file, even for a single sample. 
-    for i in winners:  #list of winning dicts from parsing all the kreports
+    CAMI_header = [
+        ["#CAMI Format for Binning"],
+        ["@Version:0.9.0"],  #TODO code this as var to get version of AMBER? 
+        ["@SampleID:" + sampleName],  #e.g. @SampleID:rhimgCAMI2_short_read_sample_0
+        []  #insert blank row before body of file
+    ]
+        
+    #write file in AMBER format of all of your bin/contig classifications, with one CAMI read per line. Good grief.
+    with open("bioboxTaxonBinsByRead.tsv", "w") as file:
+        std_writer = csv.writer(file);
+        std_writer.writerows(CAMI_header);
+        dict_writer = csv.DictWriter(file, fieldnames=bioboxKeys, delimiter="\t");
+        dict_writer.writeheader();  #prints your keys (as defined in fieldnames) as column headers to the resulting file
+        #https://stackoverflow.com/questions/33091980/difference-between-writerow-and-writerows-methods-of-python-csv-module#33092054
+        dict_writer.writerows(bioboxOut) #writerow takes a dict as argument, and writes the values for the given fieldname keys
+
+
+
 
 
 	
