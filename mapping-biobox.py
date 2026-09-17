@@ -20,16 +20,13 @@ def main():
 
 
 
-    readsMapping = []; #it's gonna be a list of dictionaries, with QNAME for seqIDs and RNAME for contig IDs
+    readsMapping = []; #it's gonna be a list of dictionaries, with QNAME key for seqID values and RNAME key for contig ID values
 
     with open(readsMapping) as file:  #file automatically closes outside of this block
         reader = csv.DictReader(file, delimiter='\t');  #first row is automatically the keys of the dictionaries
         for row in reader:
             readsMapping.append(row);
 
-
-    #list of winning dicts from all kreports
-    winners = [];
 
    
     #make a list of dicts containing all the winning classifications from each kreport
@@ -39,6 +36,11 @@ def main():
     #     read file into list of dicts   
     #     get winner dict
     #     append winner dict to list of winner dicts
+
+
+    #list of winning dicts from all kreports
+    winners = [];
+
 
     #https://stackoverflow.com/questions/56879219/how-can-i-iterate-through-a-list-of-files-and-open-each-file
     #https://stackabuse.com/python-list-files-in-a-directory/
@@ -89,22 +91,9 @@ def main():
                 result = {"@@SEQUENCEID": seq, "BINID": winner["binid"], "taxID": winner["taxid"], "length": winner["assign"], "contig": read[RNAME], "percent": winner["percent"], "rank": winner["rank"], "taxon": winner["taxon"]};
                 bioboxOut.append(result);
 
+
+
     #write mapped kreport + seqID to biobox format, to use as AMBER input.
-
-    # with open("output.csv", mode="a", newline="", encoding="utf-8") as f:
-    # # 1. Write the unique string rows first using standard csv.writer
-    # std_writer = csv.writer(f)
-    # std_writer.writerows(unique_strings)
-    
-    # # 2. Switch to csv.DictWriter to append dictionary rows
-    # dict_writer = csv.DictWriter(f, fieldnames=fieldnames)
-    
-    # # Optional: write header if starting a new file or if required
-    # # dict_writer.writeheader()
-    
-    # # Write the dictionary rows
-    # dict_writer.writerows(dict_data)
-
 
     # #CAMI Format for Binning
     # @Version:0.9.0
@@ -113,22 +102,23 @@ def main():
 
     CAMI_header = [
         ["#CAMI Format for Binning"],
-        ["@Version:0.9.0"],  #TODO code this as var to get version of AMBER? 
+        ["@Version:0.9.0"],  #TODO confirm with CAMI folks that this is the version of the biobox format itself, not AMBER? 
         ["@SampleID:" + sampleName],  #e.g. @SampleID:rhimgCAMI2_short_read_sample_0
-        []  #insert blank row before body of file
+        ["#"]  #insert commented out blank row before body of file
     ]
-        
-    #write file in AMBER format of all of your bin/contig classifications, with one CAMI read per line. Good grief.
+    
+    #print(CAMI_header);
+
+    #write file in biobox format for AMBER input of all of your bin/contig classifications, with one CAMI seq read per line. Good grief.
+    # with open("output.csv", mode="a", newline="", encoding="utf-8") as f:
+
     with open("bioboxTaxonBinsByRead.tsv", "w") as file:
         std_writer = csv.writer(file);
         std_writer.writerows(CAMI_header);
         dict_writer = csv.DictWriter(file, fieldnames=bioboxKeys, delimiter="\t");
         dict_writer.writeheader();  #prints your keys (as defined in fieldnames) as column headers to the resulting file
         #https://stackoverflow.com/questions/33091980/difference-between-writerow-and-writerows-methods-of-python-csv-module#33092054
-        dict_writer.writerows(bioboxOut) #writerow takes a dict as argument, and writes the values for the given fieldname keys
-
-
-
+        dict_writer.writerows(bioboxOut) #writerows takes a list of dicts as argument, and writes the values for the given fieldname keys
 
 
 	
