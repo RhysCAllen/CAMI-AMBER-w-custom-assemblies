@@ -1,3 +1,4 @@
+#! /usr/bin/env python
 import sys #command line args for file name input
 import csv #read in tsv as dict
 from os import scandir #get multiple files residing in a given path
