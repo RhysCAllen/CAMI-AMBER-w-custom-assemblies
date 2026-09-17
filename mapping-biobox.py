@@ -1,4 +1,4 @@
-from sys import argv, exit #command line args for file name input
+import sys #command line args for file name input
 import csv #read in tsv as dict
 from os import scandir #get multiple files residing in a given path
 
@@ -11,7 +11,7 @@ def main():
     # print(len(sys.argv))
 
     if len(sys.argv) == 4:
-        readsMapping = sys.argv[1]
+        readsToContigs = sys.argv[1]
         kreportPath = sys.argv[2]
         sampleName = sys.argv[3]
     else:
@@ -22,7 +22,7 @@ def main():
 
     readsMapping = []; #it's gonna be a list of dictionaries, with QNAME key for seqID values and RNAME key for contig ID values
 
-    with open(readsMapping) as file:  #file automatically closes outside of this block
+    with open(readsToContigs) as file:  #file automatically closes outside of this block
         reader = csv.DictReader(file, delimiter='\t');  #first row is automatically the keys of the dictionaries
         for row in reader:
             readsMapping.append(row);
@@ -45,26 +45,31 @@ def main():
     #https://stackoverflow.com/questions/56879219/how-can-i-iterate-through-a-list-of-files-and-open-each-file
     #https://stackabuse.com/python-list-files-in-a-directory/
     #with os.scandir(path) as listOfEntries:
-    with os.scandir(sys.arg[2]) as listOfEntries:
+    with scandir(sys.argv[2]) as listOfEntries:
         for entry in listOfEntries:
-            #if entry.is_file():
-            if entry.is_csv():  #entry is the (full path?) name of the file, not the contents of the file
+            if entry.is_file():  #entry is the (full path?) name of the file, not the contents of the file
                 #print(entry.name)
-                kreportIn = []  #is the scope of this gonna be remade each iteration or appended across iterations
+                #kreportIn = []  #is the scope of this gonna be remade each iteration or appended across iterations
                 #for file in files: 
-                with open(entry, 'r') as f:
+                with open(entry, 'r') as f:  #f is one tsv kreport file
                     #need keys here that do not exist in my files
                     kreportKeys = ["percent", "contain", "assign", "rank", "taxid", "taxon", "contig", "binid"];
-                    # strip() removes trailing newline characters (\n)
-                    lines = [line.strip() for line in f.readlines()]; #list comprehension, I believe
-                    kreport = dict(zip(kreportKeys, lines)); #make a new dict for each row of file
-                    kreportIn.append(kreport);
-                        #get winning row (singleton bins) or rows (mutli-contig bins), and append row(s)to bioboxOut list of dicts
-                        for row in kreportIn:
-                            if row["assign"] !=0:  #comment out this row when using multi-contig bins
-                                winners.append(row);  #comment out this row when using multi-contig bins
-                            if row["percent"] >= PERCENT:  #comment out this row when using singleton bins
-                                winners.append(row);      #comment out this row when using singleton bins
+                    # strip() removes trailing newline characters (\n) if there is no argument
+                    # Split each line by tabs to create a list of values
+                    lines = [line.strip().split('\t') for line in f.readlines()]; # a list of lists
+                    #print("lines: ", lines);
+                    kreport = [dict(zip(kreportKeys, line)) for line in lines]; # each line is a dict; kreport is a list of dicts via list comprehension
+                    #print("kreport: ", kreport);
+                    #kreportIn.append(kreport); 
+                    #get winning row (singleton bins) or rows (mutli-contig bins), and append row(s)to bioboxOut list of dicts
+                    for row in kreport:
+                        #print("row of kreport: ", row);
+                        if row["assign"] != 0:  #comment out this row when using multi-contig bins
+                            winners.append(row);  #comment out this row when using multi-contig bins
+                        #print("row['percent']: ", row["percent"]);
+                        #https://stackoverflow.com/questions/1094717/convert-a-string-to-integer-with-decimal-in-python
+                        if float(row["percent"]) >= PERCENT:  #comment out this row when using singleton bins
+                            winners.append(row);      #comment out this row when using singleton bins
 
     # head reads-to-contigs-mapping.tsv 
     # QNAME	RNAME
@@ -88,7 +93,7 @@ def main():
                 #strip the BH chars offa RNAME
                 seq = read["QNAME"].split(None, 1)[0] #get first field after splitting QNAME value by whitespace
                 #make a new dict to add to bioboxOut:
-                result = {"@@SEQUENCEID": seq, "BINID": winner["binid"], "taxID": winner["taxid"], "length": winner["assign"], "contig": read[RNAME], "percent": winner["percent"], "rank": winner["rank"], "taxon": winner["taxon"]};
+                result = {"@@SEQUENCEID": seq, "BINID": winner["binid"], "TAXID": winner["taxid"], "_CONTIG_": read["RNAME"], "_LENGTH_": winner["assign"], "_PERCENT_": winner["percent"], "_RANK_": winner["rank"], "_TAXON_": winner["taxon"]};
                 bioboxOut.append(result);
 
 
@@ -120,7 +125,7 @@ def main():
         #https://stackoverflow.com/questions/33091980/difference-between-writerow-and-writerows-methods-of-python-csv-module#33092054
         dict_writer.writerows(bioboxOut) #writerows takes a list of dicts as argument, and writes the values for the given fieldname keys
 
-
+# python mapping-biobox.py reads-to-contigs-redacted.tsv /home/codespace/clone-CAMI-AMBER-w-custom-assemblies/appended-kreport rhimgCAMI2_short_read_sample_0
 	
 if __name__ == "__main__":
     main();
