@@ -6,6 +6,7 @@ References used include https://github.com/CAMI-challenge/AMBER/tree/master and 
 Seeking clarification on the following questions:
 --where to find the specs for different biobox format versions?
 --does AMBER assume one classification per bin? Or does it break classifications into bp fractions such as 35% unclassified, 65% species A within a single bin?
+--does AMBER penalize if only the forward reads are present in the biobox file? How do we get reverse reads if they don't show up in the .sam file? 
 
 The procedure and associated scripts below can be modified for other input file formats.
 
