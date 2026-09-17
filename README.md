@@ -14,11 +14,11 @@ The input file of AMBER has a required SEQUENCEID column, which is the basis of 
 
 There are two options for the SEQUENCEID column:  
 
-A) Gold-standard contig IDs  
-Users can bin the provided gold-standard assemblies (contigs), listed in the SEQUENCEID column, such as S0C541542.  
-
-B) Individual CAMI read IDs  
-Users can bin their own custom assemblies (contigs).
-For this option, the SEQUENCEID column contains individual CAMI read IDs, such as S0R11174/1.   
+  A) Gold-standard contig IDs  
+  Users can bin the provided gold-standard assemblies (contigs), listed in the SEQUENCEID column, such as S0C541542.  
+  
+  B) Individual CAMI read IDs  
+  Users can bin their own custom assemblies (contigs).
+  For this option, the SEQUENCEID column contains individual CAMI read IDs, such as S0R11174/1.   
 
 The AMBER repo gives support for option A. This repo is attempting to provide an example of option B.   
