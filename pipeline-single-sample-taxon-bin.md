@@ -79,6 +79,18 @@ S0R16555152/2 BH:failed	c_000000223269
    done
    ```
 
+Output: your input kreports have been appended with bin and contig IDs:
+
+```
+100.00	6000	0	D	2	Bacteria	c_000000005423	bin_5
+100.00	6000	0	P	1224	Proteobacteria	c_000000005423	bin_5
+100.00	6000	0	C	1236	Gammaproteobacteria	c_000000005423	bin_5
+100.00	6000	0	O	72274	Pseudomonadales	c_000000005423	bin_5
+100.00	6000	0	F	135621	Pseudomonadaceae	c_000000005423	bin_5
+100.00	6000	0	G	286	Pseudomonas	c_000000005423	bin_5
+100.00	6000	6000	S	75612	Pseudomonas mandelii	c_000000005423	bin_5
+```
+
 
 ###### Step 3: Combine your two mapping files to create biobox file for AMBER.
 
