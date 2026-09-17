@@ -4,7 +4,7 @@ from os import scandir #get multiple files residing in a given path
 
 
 def main():
-
+    #IMPORTANT!!! 
     #see for loop below: comment out rows involving PERCENT; depending on whether using single-contig bins or multi-contig bins as input kreport path.
     PERCENT=20.00  #cutoff of percent of kmers contained (contained clade, not assigned taxon) to report a classification
 
@@ -60,23 +60,23 @@ def main():
                     #print("lines: ", lines);
                     kreport = [dict(zip(kreportKeys, line)) for line in lines]; # each line is a dict; kreport is a list of dicts via list comprehension
                     #print("kreport: ", kreport);
-                    #kreportIn.append(kreport); 
                     #get winning row (singleton bins) or rows (mutli-contig bins), and append row(s)to bioboxOut list of dicts
                     for row in kreport:
+                        #print("row: ", row)
+                        #print("row['assign']: ", row['assign'])
                         #print("row of kreport: ", row);
-                        if row["assign"] != 0:  #comment out this row when using multi-contig bins
+                        if float(row["assign"]) != 0:  #comment out this row when using multi-contig bins
                             winners.append(row);  #comment out this row when using multi-contig bins
                         #print("row['percent']: ", row["percent"]);
                         #https://stackoverflow.com/questions/1094717/convert-a-string-to-integer-with-decimal-in-python
-                        if float(row["percent"]) >= PERCENT:  #comment out this row when using singleton bins
-                            winners.append(row);      #comment out this row when using singleton bins
+                        #if float(row["percent"]) >= PERCENT:  #comment out this row when using singleton bins
+                        #    winners.append(row);      #comment out this row when using singleton bins
 
     # head reads-to-contigs-mapping.tsv 
     # QNAME	RNAME
     # S0R16554400/1 BH:failed	c_000000131573
     # S0R16554448/2 BH:changed:10	c_000000004317
     # S0R16554483/2 BH:changed:5	c_000000057414
-
     
     #take all the winning kreport results from above, and map them to their CAMI seq IDs:
     bioboxOut = [];
