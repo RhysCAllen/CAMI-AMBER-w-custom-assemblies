@@ -3,45 +3,45 @@ September 2nd, 2026
 The following attempts to describe an example of how to use AMBER to analyze taxon bins from user-created assemblies of CAMI II challenge samples.
 References used include https://github.com/CAMI-challenge/AMBER/tree/master and https://cami-challenge.org/file-formats/   
 
-Seeking clarification on the following questions:
---where to find the specs for different biobox format versions?
---does AMBER assume one classification per bin? Or does it break classifications into bp fractions such as 35% unclassified, 65% species A within a single bin?
---does AMBER penalize if only the forward reads are present in the biobox file? How do we get reverse reads if they don't show up in the .sam file? 
+Seeking clarification on the following questions:   
+--where to find the specs for different biobox format versions?   
+--does AMBER assume one classification per bin? Or does it break classifications into bp fractions such as 35% unclassified, 65% species A within a single bin?   
+--does AMBER penalize if only the forward reads are present in the biobox file? How do we get reverse reads if they don't show up in the .sam file?   
 
-The procedure and associated scripts below can be modified for other input file formats.
+The procedure and associated scripts below can be modified for other input file formats.   
 
-This procedure uses Sample 0 from the CAMI II plant rhizosphere challenge. It's highly recommended to use the most recent CAMI challenge instead, which is currently CAMI III. The reads were assembled with metaspades 4.2, binned with MetaBat2, and classified with Sourmash 4.9.4. The output of the procedure is a biobox-formatted file that can serve as input for the CAMI AMBER web portal or downloaded AMBER software. 
+This procedure uses Sample 0 from the CAMI II plant rhizosphere challenge. It's highly recommended to use the most recent CAMI challenge instead, which is currently CAMI III. The reads were assembled with metaspades 4.2, binned with MetaBat2, and classified with Sourmash 4.9.4. The output of the procedure is a biobox-formatted file that can serve as input for the CAMI AMBER web portal or downloaded AMBER software.   
 
-This procedure assumes the following:
-1) Your bin classifications are in kraken report style, or similarly map the bin ID to NCBI taxon ID.
-See https://sourmash.readthedocs.io/en/latest/command-line.html for example of kraken report style.
-2) You have classification files that enable mapping of contig to bin, such as sourmash match.csv files.
-3) A .sam file used previously for binning of sample 0 assemblies(contigs), such as sample_0.sam
+This procedure assumes the following:   
+1) Your bin classifications are in kraken report style, or similarly map the bin ID to NCBI taxon ID.   
+See https://sourmash.readthedocs.io/en/latest/command-line.html for example of kraken report style.   
+2) You have classification files that enable mapping of contig to bin, such as sourmash match.csv files.   
+3) A .sam file used previously for binning of sample 0 assemblies(contigs), such as sample_0.sam   
 
- TODO: make a note about singleton bin classification vs multi-contig bins and AMBER requirements. 
+ TODO: make a note about singleton bin classification vs multi-contig bins and AMBER requirements.   
 
-This pipeline will create the following additional files:  
-4) Mapping file of CAMI reads to your custom assemblies(contigs).
-5) Biobox output file for AMBER input. 
+This pipeline will create the following additional files:    
+4) Mapping file of CAMI reads to your custom assemblies(contigs).   
+5) Biobox output file for AMBER input.    
 
-Some additional details for using a locally installed version of AMBER rather than the web portal are in Appendix 1 below. 
-An example of how to use sourmash to create classifications used here is shown in Appendix 2. 
+Some additional details for using a locally installed version of AMBER rather than the web portal are in Appendix 1 below.    
+An example of how to use sourmash to create classifications used here is shown in Appendix 2.    
 
 ## Procedure:   
 
-###### Step 1: Create a reads-to-contigs mapping file from your bins sam file
+###### Step 1: Create a reads-to-contigs mapping file from your bins sam file   
 
-The .sam file that was used to determine differential abundance for binning your assemblies is the input file here.  
-SAM format specifications were used to choose the column headers for our mapping file: https://samtools.github.io/hts-specs/SAMv1.pdf  
+The .sam file that was used to determine differential abundance for binning your assemblies is the input file here.    
+SAM format specifications were used to choose the column headers for our mapping file: https://samtools.github.io/hts-specs/SAMv1.pdf    
 
-`echo "QNAME   RNAME" > reads-to-contigs-mapping.tsv`  
+`echo "QNAME   RNAME" > reads-to-contigs-mapping.tsv`    
 
-Append the read names and corresponding contig names:  
+Append the read names and corresponding contig names:    
 
-`awk -v FS='\t' -v OFS='\t' '!/^@/ {print $1, $3}' sample_0.sam >> reads-to-contigs-mapping.tsv`
+`awk -v FS='\t' -v OFS='\t' '!/^@/ {print $1, $3}' sample_0.sam >> reads-to-contigs-mapping.tsv`   
 
-Your output will contain the SEQUENCEID column (currently QNAME) necessary for AMBER to compare your results to the gold standard references.
-The BH tags were added during read processing by metaspades BayesHammer; they will be removed in subsequent step. 
+Your output will contain the SEQUENCEID column (currently QNAME) necessary for AMBER to compare your results to the gold standard references.  
+The BH tags were added during read processing by metaspades BayesHammer; they will be removed in subsequent step.   
 
 ```
 head reads-to-contigs-mapping.tsv 
@@ -55,8 +55,24 @@ S0R16555152/2 BH:failed	c_000000223269
 
 ###### Step 2: Create a bins-to-contigs mapping file from sourmash classifications
 
-   This procedure assumes each contig is its own bin. This is because AMBER requires being able to map the bin number to each contig. ???
+   This procedure assumes each contig is its own bin. This is because AMBER requires being able to map the bin number to each contig. ???   
 
+ >>> > "But actually naming the taxon per contig is optional, right? 
+
+All we need are SEQID (reads), BINID, TAXID
+
+So, we could try this:
+
+for each bin, list contigs. ← VEBA
+for each bin, list taxa. ← sourmash
+for each contig, list reads. ← .sam file
+
+So, the contigs would only be used to tell us which reads are in a bin. 
+Ohhh but we wouldn't know which reads go to which taxa, unless we used contigs for that. 
+And the only way to know which taxa go per contig, is to use singleton bins. "
+
+But, presumably we can use SEQID reads to BINID, e.g. the genome binning challenge. No taxonomy, but can evaluate multi-bins? Yes, because we have contigs per bin and reads per contig. No taxon-per-contig needed for the genome binning challenge. 
+>>> >
    
    See Appendix 2 for example of how sourmash files were created. 
 
