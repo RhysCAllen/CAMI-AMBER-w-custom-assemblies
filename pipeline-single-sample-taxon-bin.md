@@ -34,7 +34,7 @@ An example of how to use sourmash to create classifications used here is shown i
 The .sam file that was used to determine differential abundance for binning your assemblies is the input file here.    
 SAM format specifications were used to choose the column headers for our mapping file: https://samtools.github.io/hts-specs/SAMv1.pdf    
 
-`echo "QNAME   RNAME" > reads-to-contigs-mapping.tsv`    
+`echo "QNAME	RNAME" > reads-to-contigs-mapping.tsv`  #note that QNAME and RNAME must be separated by a tab.
 
 Append the read names and corresponding contig names:    
 
