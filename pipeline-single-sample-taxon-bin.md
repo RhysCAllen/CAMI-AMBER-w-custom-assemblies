@@ -81,17 +81,18 @@ But, presumably we can use SEQID reads to BINID, e.g. the genome binning challen
 
    Create environmental variables:
 
-   `IN=<your/path/to/csv/match/files>`
+   `MATCHES=<your/path/to/csv/match/files>`  
+   `KREPORTS=<your/path/to/txt/kreport/files>`  
    `OUT=<your/out/path>`
 
    ```
    #navigate to the directory containing your sourmash kreport outputs:
    
-   for i in $(ls "$IN"/*.csv); do
+   for i in $(ls "$MATCHES"/*.csv); do
    NAME=$(basename $i .csv);
    BIN=$(basename $i .csv | cut -d '.' -f8);
    CONTIG=$(awk -v FS=',' 'NR==2 {print $18}' "$i");
-   awk -F '\t' -v OFS='\t' -v contig=$CONTIG -v bin=$BIN '{ sub(/\r/, ""); print $0, contig, "bin_"bin }' "$OUT"/"$NAME".kreport.txt >> "$OUT"/appended-kreport/"$NAME".appended-kreport.tsv;
+   awk -F '\t' -v OFS='\t' -v contig=$CONTIG -v bin=$BIN '{ sub(/\r/, ""); print $0, contig, "bin_"bin }' "$KREPORTS"/"$NAME".kreport.txt >> "$OUT"/appended-kreport/"$NAME".appended-kreport.tsv;
    done
    ```
 
