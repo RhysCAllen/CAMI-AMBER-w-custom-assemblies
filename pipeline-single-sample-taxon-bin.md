@@ -112,10 +112,10 @@ Output: your input kreports have been appended with bin and contig IDs:
 ###### Step 3: Combine your two mapping files to create biobox file for AMBER.
 
 
-Inputs:
-reads-to-contig.mapping.tsv
-/your/path/to/amended/kreports
-your sample name, such as rhimgCAMI2_short_read_sample_0
+Inputs:   
+reads-to-contig.mapping.tsv   
+/your/path/to/amended/kreports   
+your sample name, such as rhimgCAMI2_short_read_sample_0   
 
 Note: this script has option for multi-contig bins: modify the script according to your use case.
   #see for loop below: comment out rows involving PERCENT; depending on whether using single-contig bins or multi-contig bins as input kreport path.
